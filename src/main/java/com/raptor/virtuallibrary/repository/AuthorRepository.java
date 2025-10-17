@@ -1,4 +1,7 @@
 package com.raptor.virtuallibrary.repository;
 
-public interface AuthorRepository {
+import com.raptor.virtuallibrary.entity.Author;
+import org.springframework.data.repository.CrudRepository;
+
+public interface AuthorRepository extends CrudRepository<Author, Integer> {
 }

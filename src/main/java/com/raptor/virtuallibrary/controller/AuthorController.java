@@ -2,6 +2,11 @@ package com.raptor.virtuallibrary.controller;
 
 import com.raptor.virtuallibrary.entity.Author;
 import com.raptor.virtuallibrary.service.AuthorService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +26,6 @@ public class AuthorController {
         this.authorService = authorService;
     }
 
-    // TODO: Aplicar Swagger
 
     @GetMapping("/")
     public ResponseEntity<List<Author>> findAll() {

@@ -33,8 +33,8 @@ public class AuthorController {
         return new ResponseEntity<>(authorService.findById(id), HttpStatus.OK);
     }
 
-    @GetMapping("/{name}")
-    public ResponseEntity<Author> findByName(@PathVariable String name) {
+    @GetMapping
+    public ResponseEntity<Author> findByName(@RequestParam String name) {
         return new ResponseEntity<>(authorService.findByName(name), HttpStatus.OK);
     }
 

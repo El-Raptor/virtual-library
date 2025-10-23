@@ -28,12 +28,12 @@ public class BookController {
         return new ResponseEntity<>(bookService.findById(id), HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/byIsbn")
     public ResponseEntity<Book> findBookByIsbn(@RequestParam String isbn) {
         return new ResponseEntity<>(bookService.findByIsbn(isbn), HttpStatus.OK);
     }
 
-    @GetMapping
+    @GetMapping("/byTitle")
     public ResponseEntity<Book> findBookByTitle(@RequestParam String title) {
         return new ResponseEntity<>(bookService.findByTitle(title), HttpStatus.OK);
     }

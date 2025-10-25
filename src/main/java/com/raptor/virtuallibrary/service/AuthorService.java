@@ -26,8 +26,8 @@ public class AuthorService {
         return (List<Author>) authorRepository.findAll();
     }
 
-    public void save(Author author) {
-        authorRepository.save(author);
+    public Author save(Author author) {
+        return authorRepository.save(author);
     }
 
     public void deleteById(int id) {

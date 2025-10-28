@@ -33,4 +33,57 @@ public class Book {
     @JoinColumn(name = "author_id")
     private Author author;
 
+    public static class Builder {
+        private long id;
+        private String title;
+        private String isbn;
+        private int publicationYear;
+        private int numberPages;
+        private String publisher;
+        private Author author;
+
+        public Builder id(long id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder title(String title) {
+            this.title = title;
+            return this;
+        }
+
+        public Builder isbn(String isbn) {
+            this.isbn = isbn;
+            return this;
+        }
+
+        public Builder publicationYear(int publicationYear) {
+            this.publicationYear = publicationYear;
+            return this;
+        }
+
+        public Builder numberPages(int numberPages) {
+            this.numberPages = numberPages;
+            return this;
+        }
+
+        public Builder publisher(String publisher) {
+            this.publisher = publisher;
+            return this;
+        }
+
+        public Builder author(Author author) {
+            this.author = author;
+            return this;
+        }
+
+        public Book build() {
+            return new Book(id, title, isbn, publicationYear, numberPages, publisher, author);
+        }
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
 }

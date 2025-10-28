@@ -1,6 +1,9 @@
 package com.raptor.virtuallibrary.controller;
 
+import com.raptor.virtuallibrary.dto.AuthorCreateDTO;
+import com.raptor.virtuallibrary.dto.AuthorDTO;
 import com.raptor.virtuallibrary.entity.Author;
+import com.raptor.virtuallibrary.mapper.AuthorMapper;
 import com.raptor.virtuallibrary.service.AuthorService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,8 +42,12 @@ public class AuthorController {
             )
     })
     @GetMapping("/")
-    public ResponseEntity<List<Author>> findAll() {
-        return new ResponseEntity<>(authorService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<AuthorDTO>> findAll() {
+        List<AuthorDTO> authors = authorService.findAll()
+                .stream()
+                .map(AuthorMapper::toDTO)
+                .toList();
+        return new ResponseEntity<>(authors, HttpStatus.OK);
     }
 
     @Operation(description = "Get author by its ID")
@@ -63,12 +70,12 @@ public class AuthorController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Author> findById(@Parameter(description = "Author's ID", required = true)
-                                           @PathVariable int id) {
+    public ResponseEntity<AuthorDTO> findById(@Parameter(description = "Author's ID", required = true)
+                                              @PathVariable int id) {
         var author = authorService.findById(id);
         if (author == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(author, HttpStatus.OK);
+        return new ResponseEntity<>(AuthorMapper.toDTO(author), HttpStatus.OK);
     }
 
     @Operation(description = "Get Author by its name")
@@ -91,11 +98,11 @@ public class AuthorController {
             )
     })
     @GetMapping
-    public ResponseEntity<Author> findByName(@Parameter(description = "Author Name") @RequestParam String name) {
+    public ResponseEntity<AuthorDTO> findByName(@Parameter(description = "Author Name") @RequestParam String name) {
         var author = authorService.findByName(name);
         if (author == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(author, HttpStatus.OK);
+        return new ResponseEntity<>(AuthorMapper.toDTO(author), HttpStatus.OK);
     }
 
     @Operation(description = "Create new Author")
@@ -110,10 +117,11 @@ public class AuthorController {
             )
     })
     @PostMapping("/")
-    public ResponseEntity<Author> addAuthor(@RequestBody Author author) {
+    public ResponseEntity<AuthorDTO> addAuthor(@RequestBody AuthorCreateDTO authorDTO) {
+        var author = AuthorMapper.toEntity(authorDTO);
         var newAuthor = authorService.save(author);
-        URI location = URI.create("/api/author/" + newAuthor.getId());
-        return ResponseEntity.created(location).body(newAuthor);
+        URI location = URI.create("/api/authors/" + newAuthor.getId());
+        return ResponseEntity.created(location).body(AuthorMapper.toDTO(newAuthor));
     }
 
     @Operation(description = "Update Author by its ID")
@@ -136,15 +144,15 @@ public class AuthorController {
             )
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Author> updateAuthor(@RequestBody Author author,
-                                               @Parameter(description = "Author's ID to be updated")
-                                               @PathVariable Integer id) {
+    public ResponseEntity<AuthorDTO> updateAuthor(@RequestBody AuthorDTO authorDTO,
+                                                  @Parameter(description = "Author's ID to be updated")
+                                                  @PathVariable Integer id) {
         var existingAuthor = authorService.findById(id);
         if (existingAuthor == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        author.setId(id);
-        var updatedAuthor = authorService.save(author);
-        return ResponseEntity.ok(updatedAuthor);
+        authorDTO.setId(id);
+        var updatedAuthor = authorService.save(AuthorMapper.toEntity(authorDTO));
+        return ResponseEntity.ok(AuthorMapper.toDTO(updatedAuthor));
     }
 
     @Operation(description = "Delete Author by its ID")
@@ -156,10 +164,21 @@ public class AuthorController {
                             mediaType = "application/json",
                             schema = @Schema(implementation = Author.class)
                     )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Author not found",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Author.class)
+                    )
             )
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Author> deleteAuthor(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteAuthor(@PathVariable Integer id) {
+        var author = authorService.findById(id);
+        if (author == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return ResponseEntity.noContent().build();
     }
 }

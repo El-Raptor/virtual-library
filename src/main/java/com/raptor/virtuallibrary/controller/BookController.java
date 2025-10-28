@@ -1,6 +1,9 @@
 package com.raptor.virtuallibrary.controller;
 
+import com.raptor.virtuallibrary.dto.BookCreateDTO;
+import com.raptor.virtuallibrary.dto.BookDTO;
 import com.raptor.virtuallibrary.entity.Book;
+import com.raptor.virtuallibrary.mapper.BookMapper;
 import com.raptor.virtuallibrary.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -36,8 +40,12 @@ public class BookController {
             )
     })
     @GetMapping("/")
-    public ResponseEntity<List<Book>> findAllBooks() {
-        return new ResponseEntity<>(bookService.findAll(), HttpStatus.OK);
+    public ResponseEntity<List<BookDTO>> findAllBooks() {
+        var books = bookService.findAll()
+                .stream()
+                .map(BookMapper::toDTO)
+                .toList();
+        return new ResponseEntity<>(books, HttpStatus.OK);
     }
 
     @Operation(description = "Get a book by its ID")
@@ -60,12 +68,12 @@ public class BookController {
             )
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Book> findBookById(@Parameter(description = "Book's ID to be found")
-                                             @PathVariable int id) {
+    public ResponseEntity<BookDTO> findBookById(@Parameter(description = "Book's ID to be found")
+                                                @PathVariable int id) {
         var book = bookService.findById(id);
         if (book == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(book, HttpStatus.OK);
+        return new ResponseEntity<>(BookMapper.toDTO(book), HttpStatus.OK);
     }
 
     @Operation(description = "Get a book by its ISBN")
@@ -88,12 +96,12 @@ public class BookController {
             )
     })
     @GetMapping("/byIsbn")
-    public ResponseEntity<Book> findBookByIsbn(@Parameter(description = "Book's ISBN to be found")
+    public ResponseEntity<BookDTO> findBookByIsbn(@Parameter(description = "Book's ISBN to be found")
                                                @RequestParam String isbn) {
         var book = bookService.findByIsbn(isbn);
         if (book == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        return new ResponseEntity<>(book, HttpStatus.OK);
+        return new ResponseEntity<>(BookMapper.toDTO(book), HttpStatus.OK);
     }
 
     @Operation(description = "Get a book by its title name")
@@ -116,9 +124,12 @@ public class BookController {
             )
     })
     @GetMapping("/byTitle")
-    public ResponseEntity<Book> findBookByTitle(@Parameter(description = "Book's title to be found")
+    public ResponseEntity<BookDTO> findBookByTitle(@Parameter(description = "Book's title to be found")
                                                 @RequestParam String title) {
-        return new ResponseEntity<>(bookService.findByTitle(title), HttpStatus.OK);
+        var book = bookService.findByTitle(title);
+        if (book == null)
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(BookMapper.toDTO(book), HttpStatus.OK);
     }
 
     @Operation(description = "Create a new Book")
@@ -133,8 +144,11 @@ public class BookController {
             )
     })
     @PostMapping("/")
-    public ResponseEntity<Book> addBook(@RequestBody Book book) {
-        return new ResponseEntity<>(bookService.save(book), HttpStatus.CREATED);
+    public ResponseEntity<Book> addBook(@RequestBody BookCreateDTO bookDTO) {
+        var book = BookMapper.toEntity(bookDTO);
+        var newBook = bookService.save(book);
+        var location = URI.create("/api/books/" + newBook.getId());
+        return ResponseEntity.created(location).body(newBook);
     }
 
     @Operation(description = "Update a book by its ID")
@@ -157,7 +171,7 @@ public class BookController {
             )
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@Parameter(description = "Book's ID to be found")
+    public ResponseEntity<BookDTO> updateBook(@Parameter(description = "Book's ID to be found")
                                            @PathVariable int id,
                                            @RequestBody Book book) {
         var existingBook = bookService.findById(id);
@@ -166,7 +180,7 @@ public class BookController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         var updatedBook = bookService.save(book);
-        return new ResponseEntity<>(updatedBook, HttpStatus.OK);
+        return new ResponseEntity<>(BookMapper.toDTO(updatedBook), HttpStatus.OK);
     }
 
     @Operation(description = "Remove a book by its ID")
@@ -189,9 +203,9 @@ public class BookController {
             )
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Book> deleteBook(@Parameter(description = "Book's ID to be found")
-                                               @PathVariable int id) {
-        var book =   bookService.findById(id);
+    public ResponseEntity<Void> deleteBook(@Parameter(description = "Book's ID to be found")
+                                           @PathVariable int id) {
+        var book = bookService.findById(id);
         if (book == null)
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 

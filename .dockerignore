@@ -1,0 +1,24 @@
+# Ignore version control
+.git
+.gitignore
+
+# IDE and OS metadata
+.idea
+*.iml
+.vscode
+.DS_Store
+
+# Logs and temp files
+logs/
+*.log
+tmp/
+
+# Docker and environment
+.env
+docker-compose*.yml
+
+# Node or front-end junk (if any)
+node_modules/
+
+# Maven output (let Docker build its own)
+target/

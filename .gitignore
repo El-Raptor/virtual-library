@@ -31,6 +31,8 @@ build/
 
 ### Credentials ###
 /src/main/resources/credentials.properties
+.env
+.dockerignore
 
 ### VS Code ###
 .vscode/

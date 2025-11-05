@@ -5,9 +5,6 @@ The project provides CRUD operations for authors and books, following best pract
 
 ---
 
-
----
-
 ## 🧠 Overview
 
 The **Virtual Library** API allows you to:
